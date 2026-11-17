@@ -1,0 +1,10 @@
+build/
+*.o
+*.d
+.gdb_history
+*.qcow2
+*.img
+*.iso
+*.zip
+project-history.bundle
+commit-history.txt
