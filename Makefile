@@ -4,13 +4,18 @@
 .DELETE_ON_ERROR:
 
 CC ?= cc
+GDB ?= gdb
+VALGRIND ?= valgrind
 CPPFLAGS ?=
 CFLAGS ?=
 LDFLAGS ?=
 LDLIBS ?=
+INPUT ?=
+VALGRIND_LOG ?= $(LOG_DIR)/valgrind.%p.log
 MODE ?= release
 
 BUILD_ROOT := build
+LOG_DIR := evidence
 BUILD_DIR := $(BUILD_ROOT)/$(MODE)
 APP := $(BUILD_DIR)/dots_and_boxes
 TEST_APP := $(BUILD_DIR)/test_runner
@@ -37,7 +42,11 @@ ifeq ($(filter $(MODE),release debug sanitize static),)
 $(error MODE must be release, debug, sanitize, or static)
 endif
 
-.PHONY: all release debug static sanitize test check-sources check-tests help clean _build _test
+VALGRIND_FLAGS := --tool=memcheck --leak-check=full --show-leak-kinds=all \
+                  --errors-for-leak-kinds=all --track-origins=yes --error-exitcode=99
+
+.PHONY: all release debug static sanitize test gdb gdb-check valgrind memcheck memcheck-tests \
+        check-tools check-sources check-tests help clean _build _test
 
 all: release
 
@@ -55,6 +64,49 @@ sanitize: check-tests
 
 test: check-tests
 	$(MAKE) MODE=debug _test
+
+gdb: debug
+	$(GDB) ./$(BUILD_ROOT)/debug/dots_and_boxes
+
+gdb-check: debug
+	@mkdir -p $(LOG_DIR)
+	@set -e; for name in scoring double-box invalid; do \
+		$(GDB) -q -batch -x debug/$$name.gdb ./$(BUILD_ROOT)/debug/dots_and_boxes \
+			> $(LOG_DIR)/gdb-$$name.log 2>&1 || \
+			{ cat $(LOG_DIR)/gdb-$$name.log; exit 1; }; \
+		printf 'PASS: GDB %s\n' "$$name"; \
+	done
+
+valgrind: debug
+	@mkdir -p $(LOG_DIR)
+	@if [ -n "$(INPUT)" ] && [ ! -r "$(INPUT)" ]; then \
+		printf 'Input fixture is not readable: %s\n' "$(INPUT)" >&2; exit 1; \
+	fi
+	@if [ -n "$(INPUT)" ]; then \
+		$(VALGRIND) $(VALGRIND_FLAGS) --log-file="$(VALGRIND_LOG)" \
+			./$(BUILD_ROOT)/debug/dots_and_boxes < "$(INPUT)"; \
+	else \
+		$(VALGRIND) $(VALGRIND_FLAGS) --log-file="$(VALGRIND_LOG)" \
+			./$(BUILD_ROOT)/debug/dots_and_boxes; \
+	fi
+
+memcheck-tests: test
+	@mkdir -p $(LOG_DIR)
+	$(VALGRIND) $(VALGRIND_FLAGS) --log-file=$(LOG_DIR)/valgrind-tests.%p.log \
+		./$(BUILD_ROOT)/debug/test_runner
+
+memcheck: memcheck-tests
+	@set -e; for name in scoring double-box invalid full-game a-win b-win empty; do \
+		$(VALGRIND) $(VALGRIND_FLAGS) --log-file=$(LOG_DIR)/valgrind-$$name.log \
+			./$(BUILD_ROOT)/debug/dots_and_boxes < tests/fixtures/$$name.in \
+			> $(LOG_DIR)/$$name.stdout.txt; \
+		printf 'PASS: Memcheck %s\n' "$$name"; \
+	done
+
+check-tools:
+	@set -e; for tool in $(CC) $(MAKE) $(GDB) $(VALGRIND); do \
+		command -v "$$tool" || { printf 'Missing tool: %s\n' "$$tool" >&2; exit 1; }; \
+	done
 
 check-sources:
 	@missing=0; for file in $(APP_SRC) $(HEADERS); do \
@@ -87,7 +139,21 @@ $(BUILD_DIR)/%.o: %.c Makefile
 		-MMD -MP -c $< -o $@
 
 help:
-	@printf '%s\n' 'make / make release: build the console game' 'make debug: build with debugger symbols' 'make test: run unit and console tests' 'make sanitize: run ASan/UBSan checks' 'make static: build without shared libraries' 'make clean: remove build/'
+	@printf '%s\n' \
+	  'Dots and Boxes - Sprint 1 (C11)' \
+	  'make / make release  Build optimized game in build/release/' \
+	  'make debug           Build with GDB/Valgrind symbols in build/debug/' \
+	  'make static          Build a self-contained Linux executable for the VM' \
+	  'make test            Run unit and console regression tests' \
+	  'make gdb             Open the debug game in GDB' \
+	  'make gdb-check       Replay three GDB state-inspection sessions' \
+	  'make valgrind        Run debug game under Memcheck; optional INPUT=file' \
+	  'make memcheck-tests  Run unit tests under Memcheck' \
+	  'make memcheck        Memcheck unit tests and seven console scenarios' \
+	  'make sanitize        Run tests with ASan/UBSan, separately from Valgrind' \
+	  'make check-tools     Locate C compiler, Make, GDB, and Valgrind' \
+	  'make check-sources   Check the planned application sources and headers' \
+	  'make clean           Remove build/; preserve evidence/'
 
 clean:
 	rm -rf $(BUILD_ROOT)

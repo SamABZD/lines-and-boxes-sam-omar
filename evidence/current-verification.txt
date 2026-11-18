@@ -1,0 +1,90 @@
+Sprint 1 recheck requested on 18 November 2026 (Beirut).
+Run started: 2026-11-18T17:58:14.583920+00:00
+Source baseline: 30cca18; debugging/VM files being added.
+
+$ make check-tools
+/usr/bin/cc
+/usr/bin/make
+/usr/bin/gdb
+/usr/bin/valgrind
+
+Exit status: 0
+
+$ make gdb-check CFLAGS=-Werror
+make MODE=debug _build
+make[1]: Entering directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/lines-and-boxes-sam-omar'
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c src/main.c -o build/debug/src/main.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c src/board.c -o build/debug/src/board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c src/game.c -o build/debug/src/game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c src/input.c -o build/debug/src/input.o
+cc -O0 -g3 -fno-omit-frame-pointer -Werror   build/debug/src/main.o build/debug/src/board.o build/debug/src/game.o build/debug/src/input.o  -o build/debug/dots_and_boxes
+make[1]: Leaving directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/lines-and-boxes-sam-omar'
+PASS: GDB scoring
+PASS: GDB double-box
+PASS: GDB invalid
+
+Exit status: 0
+
+$ make memcheck CFLAGS=-Werror
+make MODE=debug _test
+make[1]: Entering directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/lines-and-boxes-sam-omar'
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c tests/test_main.c -o build/debug/tests/test_main.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c tests/test_board.c -o build/debug/tests/test_board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c tests/test_game.c -o build/debug/tests/test_game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer -Werror \
+	-MMD -MP -c tests/test_input.c -o build/debug/tests/test_input.o
+cc -O0 -g3 -fno-omit-frame-pointer -Werror   build/debug/tests/test_main.o build/debug/tests/test_board.o build/debug/tests/test_game.o build/debug/tests/test_input.o build/debug/src/board.o build/debug/src/game.o build/debug/src/input.o  -o build/debug/test_runner
+./build/debug/test_runner
+PASS: 278162 checks
+sh tests/cli.sh ./build/debug/dots_and_boxes
+PASS: 7 console scenarios
+make[1]: Leaving directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/lines-and-boxes-sam-omar'
+valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --track-origins=yes --error-exitcode=99 --log-file=evidence/valgrind-tests.%p.log \
+	./build/debug/test_runner
+PASS: 278162 checks
+PASS: Memcheck scoring
+PASS: Memcheck double-box
+PASS: Memcheck invalid
+PASS: Memcheck full-game
+PASS: Memcheck a-win
+PASS: Memcheck b-win
+PASS: Memcheck empty
+
+Exit status: 0
+
+$ make sanitize CFLAGS=-Werror
+make MODE=sanitize _test
+make[1]: Entering directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/lines-and-boxes-sam-omar'
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c tests/test_main.c -o build/sanitize/tests/test_main.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c tests/test_board.c -o build/sanitize/tests/test_board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c tests/test_game.c -o build/sanitize/tests/test_game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c tests/test_input.c -o build/sanitize/tests/test_input.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c src/board.c -o build/sanitize/src/board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c src/game.c -o build/sanitize/src/game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c src/input.c -o build/sanitize/src/input.o
+cc -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror  -fsanitize=address,undefined build/sanitize/tests/test_main.o build/sanitize/tests/test_board.o build/sanitize/tests/test_game.o build/sanitize/tests/test_input.o build/sanitize/src/board.o build/sanitize/src/game.o build/sanitize/src/input.o  -o build/sanitize/test_runner
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror \
+	-MMD -MP -c src/main.c -o build/sanitize/src/main.o
+cc -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined -Werror  -fsanitize=address,undefined build/sanitize/src/main.o build/sanitize/src/board.o build/sanitize/src/game.o build/sanitize/src/input.o  -o build/sanitize/dots_and_boxes
+./build/sanitize/test_runner
+PASS: 278162 checks
+sh tests/cli.sh ./build/sanitize/dots_and_boxes
+PASS: 7 console scenarios
+make[1]: Leaving directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/lines-and-boxes-sam-omar'
+
+Exit status: 0
+

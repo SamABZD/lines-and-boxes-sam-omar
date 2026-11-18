@@ -1,0 +1,18 @@
+DOTS AND BOXES - two players, 4x5 boxes
+Enter r1 c1 r2 c2 to join adjacent dots (rows 0..4, columns 0..5).
+Complete a box to score and play again. EOF exits the game.
+
+    0   1   2   3   4   5   
+0   .   .   .   .   .   .
+                         
+1   .   .   .   .   .   .
+                         
+2   .   .   .   .   .   .
+                         
+3   .   .   .   .   .   .
+                         
+4   .   .   .   .   .   .
+Scores: A=0 B=0 | Claimed: 0/20 | Moves: 0/49
+
+Player A: enter r1 c1 r2 c2 > 
+Input ended. Game stopped before completion.

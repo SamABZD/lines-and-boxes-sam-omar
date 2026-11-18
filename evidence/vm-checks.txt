@@ -1,0 +1,5 @@
+QEMU 8.2.2, TCG, x86_64, 128 MiB RAM, one CPU, no network.
+Alpine Linux 3.24.4 root filesystem and virt kernel.
+First cold boot: automatic game startup; invalid input and B scoring verified interactively.
+Second cold boot: automatic startup with no login prompt; all 49 edges; A=10 B=10 draw; automatic restart.
+VM display screenshot: alpine-boot.png (QEMU screendump).

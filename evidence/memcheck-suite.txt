@@ -1,0 +1,37 @@
+$ make memcheck
+make MODE=debug _test
+make[1]: Entering directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1'
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c tests/test_main.c -o build/debug/tests/test_main.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c tests/test_board.c -o build/debug/tests/test_board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c tests/test_game.c -o build/debug/tests/test_game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c tests/test_input.c -o build/debug/tests/test_input.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c src/board.c -o build/debug/src/board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c src/game.c -o build/debug/src/game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c src/input.c -o build/debug/src/input.o
+cc -O0 -g3 -fno-omit-frame-pointer    build/debug/tests/test_main.o build/debug/tests/test_board.o build/debug/tests/test_game.o build/debug/tests/test_input.o build/debug/src/board.o build/debug/src/game.o build/debug/src/input.o  -o build/debug/test_runner
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O0 -g3 -fno-omit-frame-pointer  \
+	-MMD -MP -c src/main.c -o build/debug/src/main.o
+cc -O0 -g3 -fno-omit-frame-pointer    build/debug/src/main.o build/debug/src/board.o build/debug/src/game.o build/debug/src/input.o  -o build/debug/dots_and_boxes
+./build/debug/test_runner
+PASS: 278162 checks
+sh tests/cli.sh ./build/debug/dots_and_boxes
+PASS: 7 console scenarios
+make[1]: Leaving directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1'
+valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --track-origins=yes --error-exitcode=99 --log-file=evidence/valgrind-tests.%p.log \
+	./build/debug/test_runner
+PASS: 278162 checks
+PASS: Memcheck scoring
+PASS: Memcheck double-box
+PASS: Memcheck invalid
+PASS: Memcheck full-game
+PASS: Memcheck a-win
+PASS: Memcheck b-win
+PASS: Memcheck empty
+Exit status: 0

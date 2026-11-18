@@ -1,0 +1,19 @@
+$ sh vm/build-image.sh
+alpine-minirootfs-3.24.4-x86_64.tar.gz: OK
+vmlinuz-virt: OK
+make: Entering directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1'
+make MODE=static _build
+make[1]: Entering directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1'
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O2 -DNDEBUG  \
+	-MMD -MP -c src/main.c -o build/static/src/main.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O2 -DNDEBUG  \
+	-MMD -MP -c src/board.c -o build/static/src/board.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O2 -DNDEBUG  \
+	-MMD -MP -c src/game.c -o build/static/src/game.o
+cc -Iinclude  -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -O2 -DNDEBUG  \
+	-MMD -MP -c src/input.c -o build/static/src/input.o
+cc -O2 -DNDEBUG   -static build/static/src/main.o build/static/src/board.o build/static/src/game.o build/static/src/input.o  -o build/static/dots_and_boxes
+make[1]: Leaving directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1'
+make: Leaving directory '/mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1'
+Built Alpine 3.24.4 VM image in /mnt/c/Users/samab/Documents/Codex/2026-11-14/lan/outputs/dots-and-boxes-sprint1/build/vm
+Exit status: 0

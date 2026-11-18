@@ -1,39 +1,68 @@
 # Lines and Boxes - Sam and Omar
 
-Private repository: [SamABZD/lines-and-boxes-sam-omar](https://github.com/SamABZD/lines-and-boxes-sam-omar).
+Repository: [SamABZD/lines-and-boxes-sam-omar](https://github.com/SamABZD/lines-and-boxes-sam-omar) (private).
 
-Sprint 1 console game, written in portable C11, for two local players on a board of 4x5 boxes (5x6 dots). Completing a box earns a point and another turn. A shared edge can complete two boxes. The game ends when all 20 boxes are claimed and declares the winner or a draw.
+Original C11 console game for two local players on a 4x5 board of boxes. A completed box earns a point and another turn. A shared edge can complete two boxes. The game ends after all 20 boxes are claimed and announces A, B, or a draw.
 
-## Current modules
+Only Sprint 1 is implemented. This repository regroups an existing implementation into meaningful increments: board/input foundations; game-state rules and tests; the interactive console interface; console regression tests; and debugger/memory verification plus Alpine VM startup. The implementation and its original verification existed before this regrouping. GitHub research preceded the original implementation. Commit timestamps record when each increment is actually committed.
 
-- `src/board.c` and `include/board.h`: board storage, valid-edge checks, rendering, and awarding completed boxes, including two boxes from one shared edge.
-- `src/input.c` and `include/input.h`: safe parsing of four coordinates and recovery after malformed or overlong input.
-- `src/game.c` and `include/game.h`: alternating turns, scores, extra turns after captures, move counts, game completion, and winner/draw detection.
-- `src/main.c`: terminal prompts, board/score display, input errors, the game loop, and final results.
-- `tests/`: board/input and game-state unit checks, plus console fixtures and regression checks in `tests/cli.sh`.
-- `Makefile`: builds the console game and unit-test runner using GNU Make.
-- `github-research.md`: references inspected before the original implementation; no source code was copied.
+## Build and play
 
-## Build and verify
-
-On Linux or Ubuntu WSL, with a C compiler and GNU Make:
+On Linux or Ubuntu WSL, from the project root:
 
 ```sh
 make
 ./build/release/dots_and_boxes
-make test
 ```
 
-Enter four decimal integers: `r1 c1 r2 c2`. Dot rows are 0..4 and columns are 0..5. For example, `0 0 0 1` draws the upper-left horizontal edge. Reversed endpoints identify the same edge. Invalid input leaves the current player's turn unchanged. Ctrl+D at an empty prompt exits cleanly.
+Requires a C compiler and GNU Make. Enter four decimal integers: `r1 c1 r2 c2`. Dot rows are 0..4 and columns are 0..5. For example, `0 0 0 1` draws the upper-left horizontal connection. Reversed endpoints identify the same edge. Invalid input preserves the current turn. Ctrl+D at an empty prompt exits cleanly.
 
-`make test` runs the unit suite in `build/debug/test_runner` and seven console scenarios covering captures, invalid moves, wins, draws, and EOF. `make debug`, `make sanitize`, and `make static` select debugger-friendly, ASan/UBSan, and static builds. Build modes use separate directories. Run `make clean` before changing compiler flags within an existing mode; it removes `build/`.
+Application source: `src/main.c`, `src/board.c`, `src/game.c`, `src/input.c`; public headers are in `include/`. The game uses standard C facilities and no graphical library.
 
-## Delivery progress
+## Verify and debug
 
-1. Board/input foundations and their tests.
-2. Game-state management and its unit tests.
-3. Interactive console interface and application build.
-4. Console fixtures and regression checks (this commit).
-5. GDB/Valgrind verification, debugging notes, and the automatically starting Alpine VM (pending).
+```sh
+make test
+make gdb-check
+make memcheck
+make sanitize
+```
 
-The gameplay batch is split into smaller commits that will be added over time. This delivery regroups an existing Sprint 1 implementation. Commit dates record when the batches are actually committed, rather than when the code was originally written. The technical report is excluded throughout.
+Install GDB and Valgrind before the relevant checks. Use `make gdb` for an interactive debugger. For one memory-check case:
+
+```sh
+make valgrind INPUT=tests/fixtures/scoring.in
+```
+
+`make help` lists all targets. Release, debug, sanitizer, and static builds use different directories. If changing compiler/flags for an existing mode, run `make clean` before rebuilding. `make clean` removes all of `build/`, including generated VM images; keep a copy of the supplied archive if needed.
+
+Verified: 278,162 assertions, seven console scenarios, three GDB state checks, and Valgrind unit/game runs with zero reported errors and all heap allocations freed. ASan/UBSan checks pass. See `debugging-strategy.md` and `evidence/` for actual commands and results.
+
+## Start the Alpine VM
+
+Sprint 1 asks for a small Linux VM that starts the game automatically without a desktop or login prompt. Alpine is the Linux distribution used for this requirement; QEMU runs the virtual machine.
+
+[Download the complete Sprint 1 ZIP](https://github.com/SamABZD/lines-and-boxes-sam-omar/releases/download/sprint-1/LinesAndBoxes_Sam_Omar_Sprint1.zip), extract it, and open its project folder. The ZIP includes `build/vm/vmlinuz-virt` and `build/vm/initramfs.cpio.gz`. With QEMU installed on Linux/WSL:
+
+```sh
+sh vm/run.sh
+```
+
+QEMU boots Alpine 3.24.4 directly into the game without a login prompt. Press Ctrl+A, then X to exit QEMU. The VM has 128 MiB RAM, one emulated x86_64 CPU, no network, and no disk. A completed or exited game restarts automatically. Each VM boot starts a fresh board. The game also starts on the VGA console.
+
+To recreate the image from pinned official Alpine assets, install `cpio`, `gzip`, `tar`, a static-capable C toolchain, and curl or wget, then run as root:
+
+```sh
+sudo sh vm/build-image.sh
+```
+
+The script changes only its temporary root filesystem and build outputs. See `alpine-vm-plan.md` for the architecture, verification, and optional conventional installation approach.
+
+## Supporting files
+
+- `github-research.md`: repositories inspected before the original implementation; no code was copied.
+- `debugging-strategy.md`: reproducible debugging strategy and results.
+- `evidence/`: original unit/console results, GDB logs, Valgrind logs, VM boot/play logs, and a genuine QEMU screenshot.
+- `vm/`: scripts, startup configuration, and pinned sources for the bootable Alpine VM.
+
+The technical report is intentionally excluded. Generated VM images are supplied in the GitHub release ZIP; their build scripts and pinned checksums are tracked in this repository. Historical verification logs retain their original dates, paths, and baseline identifiers. Fresh verification is in `evidence/current-verification.txt` and `evidence/alpine-current-boot.log`.

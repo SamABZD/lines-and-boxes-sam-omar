@@ -1,0 +1,10 @@
+#!/bin/sh
+mount -t devtmpfs devtmpfs /dev
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+exec </dev/console >/dev/console 2>&1
+export TERM=linux
+printf '\nAlpine Linux %s - Dots and Boxes Sprint 1\n' "$(cat /etc/alpine-release)"
+exec /sbin/init

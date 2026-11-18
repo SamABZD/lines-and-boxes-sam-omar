@@ -1,0 +1,5 @@
+::sysinit:/bin/hostname dots-and-boxes
+ttyS0::respawn:/bin/su -s /opt/dots-and-boxes/dots_and_boxes dots
+tty1::respawn:/bin/su -s /opt/dots-and-boxes/dots_and_boxes dots
+::ctrlaltdel:/sbin/reboot -f
+::shutdown:/bin/umount -a -r
