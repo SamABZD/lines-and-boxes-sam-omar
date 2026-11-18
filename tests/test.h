@@ -6,6 +6,7 @@
 void test_check(bool condition, const char *expression, const char *file, int line);
 void test_board(void);
 void test_input(void);
+void test_game(void);
 
 #define CHECK(expression) test_check((expression), #expression, __FILE__, __LINE__)
 

@@ -18,6 +18,7 @@ int main(void)
 {
     test_board();
     test_input();
+    test_game();
     printf("PASS: %u checks\n", checks);
     return EXIT_SUCCESS;
 }
