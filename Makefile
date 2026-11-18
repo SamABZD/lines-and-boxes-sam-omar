@@ -65,7 +65,7 @@ check-sources:
 	fi
 
 check-tests: check-sources
-	@missing=0; for file in $(TEST_SRC) tests/test.h; do \
+	@missing=0; for file in $(TEST_SRC) tests/test.h tests/cli.sh; do \
 		if [ ! -f "$$file" ]; then printf 'Missing planned test: %s\n' "$$file" >&2; missing=1; fi; \
 	done; test "$$missing" -eq 0
 
@@ -73,6 +73,7 @@ _build: $(APP)
 
 _test: $(TEST_APP) $(APP)
 	./$(TEST_APP)
+	sh tests/cli.sh ./$(APP)
 
 $(APP): $(APP_OBJ)
 	$(CC) $(MODE_CFLAGS_$(MODE)) $(CFLAGS) $(LDFLAGS) $(MODE_LDFLAGS_$(MODE)) $^ $(LDLIBS) -o $@
@@ -86,7 +87,7 @@ $(BUILD_DIR)/%.o: %.c Makefile
 		-MMD -MP -c $< -o $@
 
 help:
-	@printf '%s\n' 'make / make release: build the console game' 'make debug: build with debugger symbols' 'make test: run unit tests' 'make sanitize: run ASan/UBSan checks' 'make static: build without shared libraries' 'make clean: remove build/'
+	@printf '%s\n' 'make / make release: build the console game' 'make debug: build with debugger symbols' 'make test: run unit and console tests' 'make sanitize: run ASan/UBSan checks' 'make static: build without shared libraries' 'make clean: remove build/'
 
 clean:
 	rm -rf $(BUILD_ROOT)
