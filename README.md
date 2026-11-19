@@ -26,3 +26,5 @@ make valgrind
 ```
 
 The checks and results are in the [debugging notes](debugging-strategy.md). The source and VM image are in the [Sprint 1 download](https://github.com/SamABZD/lines-and-boxes-sam-omar/releases/latest).
+
+The [screenshots](evidence/screenshots/README.md) show startup, gameplay, and the test results.
