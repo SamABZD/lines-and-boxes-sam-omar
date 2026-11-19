@@ -5,15 +5,15 @@ DOTS AND BOXES - two players, 4x5 boxes
 Enter r1 c1 r2 c2 to join adjacent dots (rows 0..4, columns 0..5).
 Complete a box to score and play again. EOF exits the game.
 
-    0   1   2   3   4   5   
+    0   1   2   3   4   5
 0   .   .   .   .   .   .
-                         
+
 1   .   .   .   .   .   .
-                         
+
 2   .   .   .   .   .   .
-                         
+
 3   .   .   .   .   .   .
-                         
+
 4   .   .   .   .   .   .
 Scores: A=0 B=0 | Claimed: 0/20 | Moves: 0/49
 
@@ -27,19 +27,19 @@ Player A: enter r1 c1 r2 c2 > Invalid move: Dot rows must be 0..4 and columns mu
 Player A: enter r1 c1 r2 c2 > Invalid move: Connect two distinct, horizontally or vertically adjacent dots. Same player's turn.
 Player A: enter r1 c1 r2 c2 > Invalid move: Connect two distinct, horizontally or vertically adjacent dots. Same player's turn.
 Player A: enter r1 c1 r2 c2 > Invalid move: Connect two distinct, horizontally or vertically adjacent dots. Same player's turn.
-Player A: enter r1 c1 r2 c2 >     0   1   2   3   4   5   
+Player A: enter r1 c1 r2 c2 >     0   1   2   3   4   5
 0   .---.   .   .   .   .
-                         
+
 1   .   .   .   .   .   .
-                         
+
 2   .   .   .   .   .   .
-                         
+
 3   .   .   .   .   .   .
-                         
+
 4   .   .   .   .   .   .
 Scores: A=0 B=0 | Claimed: 0/20 | Moves: 1/49
 
-Player B: enter r1 c1 r2 c2 > 
+Player B: enter r1 c1 r2 c2 >
 Breakpoint 1, board_apply_move (board=0x7fffffffdf10, move=..., player=PLAYER_B, claimed=0x7fffffffdef0) at src/board.c:65
 65	    *claimed = 0U;
 
@@ -58,7 +58,7 @@ GDB: board_apply_move returned MOVE_ALREADY_DRAWN
 Value returned is $4 = MOVE_ALREADY_DRAWN
 $5 = {board = {horizontal = {{true, false, false, false, false}, {false, false, false, false, false}, {false, false, false, false, false}, {false, false, false, false, false}, {false, false, false, false, false}}, vertical = {{false, false, false, false, false, false}, {false, false, false, false, false, false}, {false, false, false, false, false, false}, {false, false, false, false, false, false}}, owners = {{PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE}, {PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE}, {PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE}, {PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE, PLAYER_NONE}}}, scores = {0, 0}, current_player = PLAYER_B, moves_played = 1, claimed_boxes = 0}
 Invalid move: That edge is already drawn. Same player's turn.
-Player B: enter r1 c1 r2 c2 > 
+Player B: enter r1 c1 r2 c2 >
 Input ended. Game stopped before completion.
-[Inferior 1 (process 81) exited normally]
+[Inferior 1 (process 138) exited normally]
 PASS: GDB verified duplicate rejection without a lost turn

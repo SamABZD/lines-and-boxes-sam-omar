@@ -1,161 +1,107 @@
-# Sprint 1 C build configuration.
-# Run this Makefile with GNU Make on Linux, including Ubuntu WSL or Alpine.
-.DEFAULT_GOAL := all
-.DELETE_ON_ERROR:
-
 CC ?= cc
 GDB ?= gdb
 VALGRIND ?= valgrind
-CPPFLAGS ?=
-CFLAGS ?=
-LDFLAGS ?=
-LDLIBS ?=
-INPUT ?=
+
+CORE = src/board.c src/game.c src/input.c
+GAME = src/main.c $(CORE)
+TESTS = tests/test_main.c tests/test_board.c tests/test_game.c tests/test_input.c $(CORE)
+HEADERS = include/board.h include/game.h include/input.h
+COMPILE = $(CC) -Iinclude $(CPPFLAGS) -std=c11 -Wall -Wextra -Wpedantic \
+	-Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes
+
+DEBUG_FLAGS = -O0 -g3 -fno-omit-frame-pointer
+SANITIZE_FLAGS = -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined
+RELEASE_GAME = build/release/dots_and_boxes
+DEBUG_GAME = build/debug/dots_and_boxes
+DEBUG_TESTS = build/debug/test_runner
+STATIC_GAME = build/static/dots_and_boxes
+SANITIZE_GAME = build/sanitize/dots_and_boxes
+SANITIZE_TESTS = build/sanitize/test_runner
+
+LOG_DIR ?= build/logs
 VALGRIND_LOG ?= $(LOG_DIR)/valgrind.%p.log
-MODE ?= release
+MEMCHECK = $(VALGRIND) --leak-check=full --show-leak-kinds=all \
+	--errors-for-leak-kinds=all --track-origins=yes --error-exitcode=99
+CASES = scoring double-box invalid full-game a-win b-win empty
 
-BUILD_ROOT := build
-LOG_DIR := evidence
-BUILD_DIR := $(BUILD_ROOT)/$(MODE)
-APP := $(BUILD_DIR)/dots_and_boxes
-TEST_APP := $(BUILD_DIR)/test_runner
-
-LIB_SRC := src/board.c src/game.c src/input.c
-APP_SRC := src/main.c $(LIB_SRC)
-HEADERS := include/board.h include/game.h include/input.h
-TEST_SRC := tests/test_main.c tests/test_board.c tests/test_game.c tests/test_input.c
-APP_OBJ := $(patsubst %.c,$(BUILD_DIR)/%.o,$(APP_SRC))
-TEST_OBJ := $(patsubst %.c,$(BUILD_DIR)/%.o,$(TEST_SRC) $(LIB_SRC))
-DEPS := $(sort $(APP_OBJ:.o=.d) $(TEST_OBJ:.o=.d))
-
-BASE_FLAGS := -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion \
-              -Wstrict-prototypes -Wmissing-prototypes
-PROJECT_CPPFLAGS := -Iinclude
-MODE_CFLAGS_release := -O2 -DNDEBUG
-MODE_CFLAGS_debug := -O0 -g3 -fno-omit-frame-pointer
-MODE_CFLAGS_sanitize := -O1 -g3 -fno-omit-frame-pointer -fsanitize=address,undefined
-MODE_LDFLAGS_sanitize := -fsanitize=address,undefined
-MODE_CFLAGS_static := -O2 -DNDEBUG
-MODE_LDFLAGS_static := -static
-
-ifeq ($(filter $(MODE),release debug sanitize static),)
-$(error MODE must be release, debug, sanitize, or static)
-endif
-
-VALGRIND_FLAGS := --tool=memcheck --leak-check=full --show-leak-kinds=all \
-                  --errors-for-leak-kinds=all --track-origins=yes --error-exitcode=99
-
-.PHONY: all release debug static sanitize test gdb gdb-check valgrind memcheck memcheck-tests \
-        check-tools check-sources check-tests help clean _build _test
+.PHONY: all release debug static test sanitize gdb gdb-check valgrind memcheck-tests memcheck check-tools help clean
+.DELETE_ON_ERROR:
 
 all: release
+release: $(RELEASE_GAME)
+debug: $(DEBUG_GAME)
+static: $(STATIC_GAME)
 
-release: check-sources
-	$(MAKE) MODE=release _build
+# Each command builds one executable from its C files.
+$(RELEASE_GAME): $(GAME) $(HEADERS) Makefile
+	@mkdir -p $(@D)
+	$(COMPILE) -O2 -DNDEBUG $(CFLAGS) $(GAME) $(LDFLAGS) $(LDLIBS) -o $@
 
-debug: check-sources
-	$(MAKE) MODE=debug _build
+$(DEBUG_GAME): $(GAME) $(HEADERS) Makefile
+	@mkdir -p $(@D)
+	$(COMPILE) $(DEBUG_FLAGS) $(CFLAGS) $(GAME) $(LDFLAGS) $(LDLIBS) -o $@
 
-static: check-sources
-	$(MAKE) MODE=static _build
+$(STATIC_GAME): $(GAME) $(HEADERS) Makefile
+	@mkdir -p $(@D)
+	$(COMPILE) -O2 -DNDEBUG $(CFLAGS) $(GAME) $(LDFLAGS) -static $(LDLIBS) -o $@
 
-sanitize: check-tests
-	$(MAKE) MODE=sanitize _test
+$(DEBUG_TESTS): $(TESTS) $(HEADERS) tests/test.h Makefile
+	@mkdir -p $(@D)
+	$(COMPILE) $(DEBUG_FLAGS) $(CFLAGS) $(TESTS) $(LDFLAGS) $(LDLIBS) -o $@
 
-test: check-tests
-	$(MAKE) MODE=debug _test
+$(SANITIZE_GAME): $(GAME) $(HEADERS) Makefile
+	@mkdir -p $(@D)
+	$(COMPILE) $(SANITIZE_FLAGS) $(CFLAGS) $(GAME) $(LDFLAGS) $(LDLIBS) -o $@
+
+$(SANITIZE_TESTS): $(TESTS) $(HEADERS) tests/test.h Makefile
+	@mkdir -p $(@D)
+	$(COMPILE) $(SANITIZE_FLAGS) $(CFLAGS) $(TESTS) $(LDFLAGS) $(LDLIBS) -o $@
+
+test: $(DEBUG_TESTS) $(DEBUG_GAME)
+	./$(DEBUG_TESTS)
+	sh tests/cli.sh ./$(DEBUG_GAME)
+
+sanitize: $(SANITIZE_TESTS) $(SANITIZE_GAME)
+	./$(SANITIZE_TESTS)
+	sh tests/cli.sh ./$(SANITIZE_GAME)
 
 gdb: debug
-	$(GDB) ./$(BUILD_ROOT)/debug/dots_and_boxes
+	$(GDB) ./$(DEBUG_GAME)
 
 gdb-check: debug
-	@mkdir -p $(LOG_DIR)
+	@mkdir -p "$(LOG_DIR)"
 	@set -e; for name in scoring double-box invalid; do \
-		$(GDB) -q -batch -x debug/$$name.gdb ./$(BUILD_ROOT)/debug/dots_and_boxes \
-			> $(LOG_DIR)/gdb-$$name.log 2>&1 || \
-			{ cat $(LOG_DIR)/gdb-$$name.log; exit 1; }; \
+		log="$(LOG_DIR)/gdb-$$name.log"; \
+		$(GDB) -q -batch -x "debug/$$name.gdb" ./$(DEBUG_GAME) > "$$log" 2>&1 || { cat "$$log"; exit 1; }; \
 		printf 'PASS: GDB %s\n' "$$name"; \
 	done
 
 valgrind: debug
-	@mkdir -p $(LOG_DIR)
-	@if [ -n "$(INPUT)" ] && [ ! -r "$(INPUT)" ]; then \
-		printf 'Input fixture is not readable: %s\n' "$(INPUT)" >&2; exit 1; \
-	fi
+	@mkdir -p "$(LOG_DIR)"
 	@if [ -n "$(INPUT)" ]; then \
-		$(VALGRIND) $(VALGRIND_FLAGS) --log-file="$(VALGRIND_LOG)" \
-			./$(BUILD_ROOT)/debug/dots_and_boxes < "$(INPUT)"; \
+		$(MEMCHECK) --log-file="$(VALGRIND_LOG)" ./$(DEBUG_GAME) < "$(INPUT)"; \
 	else \
-		$(VALGRIND) $(VALGRIND_FLAGS) --log-file="$(VALGRIND_LOG)" \
-			./$(BUILD_ROOT)/debug/dots_and_boxes; \
+		$(MEMCHECK) --log-file="$(VALGRIND_LOG)" ./$(DEBUG_GAME); \
 	fi
 
 memcheck-tests: test
-	@mkdir -p $(LOG_DIR)
-	$(VALGRIND) $(VALGRIND_FLAGS) --log-file=$(LOG_DIR)/valgrind-tests.%p.log \
-		./$(BUILD_ROOT)/debug/test_runner
+	@mkdir -p "$(LOG_DIR)"
+	$(MEMCHECK) --log-file="$(LOG_DIR)/valgrind-tests.%p.log" ./$(DEBUG_TESTS)
 
 memcheck: memcheck-tests
-	@set -e; for name in scoring double-box invalid full-game a-win b-win empty; do \
-		$(VALGRIND) $(VALGRIND_FLAGS) --log-file=$(LOG_DIR)/valgrind-$$name.log \
-			./$(BUILD_ROOT)/debug/dots_and_boxes < tests/fixtures/$$name.in \
-			> $(LOG_DIR)/$$name.stdout.txt; \
+	@set -e; for name in $(CASES); do \
+		$(MEMCHECK) --log-file="$(LOG_DIR)/valgrind-$$name.log" ./$(DEBUG_GAME) \
+			< "tests/fixtures/$$name.in" > "$(LOG_DIR)/$$name.stdout.txt"; \
 		printf 'PASS: Memcheck %s\n' "$$name"; \
 	done
 
 check-tools:
-	@set -e; for tool in $(CC) $(MAKE) $(GDB) $(VALGRIND); do \
-		command -v "$$tool" || { printf 'Missing tool: %s\n' "$$tool" >&2; exit 1; }; \
-	done
-
-check-sources:
-	@missing=0; for file in $(APP_SRC) $(HEADERS); do \
-		if [ ! -f "$$file" ]; then printf 'Missing planned source: %s\n' "$$file" >&2; missing=1; fi; \
-	done; \
-	if [ "$$missing" -ne 0 ]; then \
-		printf 'Restore the missing source files before building.\n' >&2; exit 1; \
-	fi
-
-check-tests: check-sources
-	@missing=0; for file in $(TEST_SRC) tests/test.h tests/cli.sh; do \
-		if [ ! -f "$$file" ]; then printf 'Missing planned test: %s\n' "$$file" >&2; missing=1; fi; \
-	done; test "$$missing" -eq 0
-
-_build: $(APP)
-
-_test: $(TEST_APP) $(APP)
-	./$(TEST_APP)
-	sh tests/cli.sh ./$(APP)
-
-$(APP): $(APP_OBJ)
-	$(CC) $(MODE_CFLAGS_$(MODE)) $(CFLAGS) $(LDFLAGS) $(MODE_LDFLAGS_$(MODE)) $^ $(LDLIBS) -o $@
-
-$(TEST_APP): $(TEST_OBJ)
-	$(CC) $(MODE_CFLAGS_$(MODE)) $(CFLAGS) $(LDFLAGS) $(MODE_LDFLAGS_$(MODE)) $^ $(LDLIBS) -o $@
-
-$(BUILD_DIR)/%.o: %.c Makefile
-	@mkdir -p $(@D)
-	$(CC) $(PROJECT_CPPFLAGS) $(CPPFLAGS) $(BASE_FLAGS) $(MODE_CFLAGS_$(MODE)) $(CFLAGS) \
-		-MMD -MP -c $< -o $@
+	@set -e; for tool in $(firstword $(CC)) $(MAKE) $(GDB) $(VALGRIND); do command -v "$$tool"; done
 
 help:
-	@printf '%s\n' \
-	  'Dots and Boxes - Sprint 1 (C11)' \
-	  'make / make release  Build optimized game in build/release/' \
-	  'make debug           Build with GDB/Valgrind symbols in build/debug/' \
-	  'make static          Build a self-contained Linux executable for the VM' \
-	  'make test            Run unit and console regression tests' \
-	  'make gdb             Open the debug game in GDB' \
-	  'make gdb-check       Replay three GDB state-inspection sessions' \
-	  'make valgrind        Run debug game under Memcheck; optional INPUT=file' \
-	  'make memcheck-tests  Run unit tests under Memcheck' \
-	  'make memcheck        Memcheck unit tests and seven console scenarios' \
-	  'make sanitize        Run tests with ASan/UBSan, separately from Valgrind' \
-	  'make check-tools     Locate C compiler, Make, GDB, and Valgrind' \
-	  'make check-sources   Check the planned application sources and headers' \
-	  'make clean           Remove build/; preserve evidence/'
+	@printf '%s\n' 'make          Build the game' 'make test     Run the tests' \
+		'make gdb      Open GDB' 'make gdb-check  Run GDB checks' \
+		'make memcheck  Run Valgrind checks' 'make sanitize  Run sanitizer checks'
 
 clean:
-	rm -rf $(BUILD_ROOT)
-
--include $(DEPS)
+	rm -rf build/release build/debug build/static build/sanitize build/logs

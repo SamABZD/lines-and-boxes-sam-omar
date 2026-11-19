@@ -1,8 +1,0 @@
-Batch 2 - board and input checks
-
-$ cc -std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Werror -O0 -g3 -Iinclude -Itests src/board.c src/input.c tests/test_main.c tests/test_board.c tests/test_input.c -o build/core/test_runner
-Exit status: 0
-
-$ ./build/core/test_runner
-PASS: 546 checks
-Exit status: 0

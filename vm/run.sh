@@ -3,7 +3,7 @@ set -eu
 project=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 image=${1:-"$project/build/vm"}
 if [ ! -f "$image/vmlinuz-virt" ] || [ ! -f "$image/initramfs.cpio.gz" ]; then
-    printf 'Build the VM image first: sudo sh vm/build-image.sh\n' >&2
+    printf 'VM image files are missing.\n' >&2
     exit 1
 fi
 exec qemu-system-x86_64 -machine accel=tcg -m 128 -smp 1 \
