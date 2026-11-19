@@ -40,18 +40,18 @@ Player A: enter r1 c1 r2 c2 >     0   1   2   3   4   5
 Scores: A=0 B=0 | Claimed: 0/20 | Moves: 1/49
 
 Player B: enter r1 c1 r2 c2 >
-Breakpoint 1, board_apply_move (board=0x7fffffffdf10, move=..., player=PLAYER_B, claimed=0x7fffffffdef0) at src/board.c:65
+Breakpoint 1, board_apply_move (board=0x7fffffffdfc0, move=..., player=PLAYER_B, claimed=0x7fffffffdfa0) at src/board.c:65
 65	    *claimed = 0U;
 
 GDB: inspect a reversed duplicate before rejection
 $1 = {r1 = 0, c1 = 1, r2 = 0, c2 = 0}
 $2 = true
-0x0000555555555f9e in game_play_turn (game=0x7fffffffdf10, move=..., claimed=0x7fffffffdef0) at src/game.c:23
+0x000055555555630e in game_play_turn (game=0x7fffffffdfc0, move=..., claimed=0x7fffffffdfa0) at src/game.c:23
 23	    status = board_apply_move(&game->board, move, game->current_player, claimed);
 Value returned is $3 = MOVE_ALREADY_DRAWN
 
 GDB: board_apply_move returned MOVE_ALREADY_DRAWN
-#0  0x0000555555555f9e in game_play_turn (game=0x7fffffffdf10, move=..., claimed=0x7fffffffdef0) at src/game.c:23
+#0  0x000055555555630e in game_play_turn (game=0x7fffffffdfc0, move=..., claimed=0x7fffffffdfa0) at src/game.c:23
 #1  0x00005555555554fc in main () at src/main.c:50
 0x00005555555554fc in main () at src/main.c:50
 50	        move_status = game_play_turn(&game, move, &claimed);
@@ -60,5 +60,5 @@ $5 = {board = {horizontal = {{true, false, false, false, false}, {false, false, 
 Invalid move: That edge is already drawn. Same player's turn.
 Player B: enter r1 c1 r2 c2 >
 Input ended. Game stopped before completion.
-[Inferior 1 (process 138) exited normally]
+[Inferior 1 (process 135) exited normally]
 PASS: GDB verified duplicate rejection without a lost turn

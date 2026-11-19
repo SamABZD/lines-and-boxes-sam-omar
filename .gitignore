@@ -1,4 +1,6 @@
 build/
+/dotsboxes
+/valgrind.txt
 *.o
 *.d
 .gdb_history

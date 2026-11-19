@@ -1,4 +1,4 @@
-Breakpoint 1 at 0x1f55: file src/game.c, line 19.
+Breakpoint 1 at 0x22c5: file src/game.c, line 19.
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 DOTS AND BOXES - two players, 4x5 boxes
@@ -90,7 +90,7 @@ Player B: enter r1 c1 r2 c2 >     0   1   2   3   4   5
 Scores: A=0 B=0 | Claimed: 0/20 | Moves: 6/49
 
 Player A: enter r1 c1 r2 c2 >
-Breakpoint 1, game_play_turn (game=0x7fffffffdf10, move=..., claimed=0x7fffffffdef0) at src/game.c:19
+Breakpoint 1, game_play_turn (game=0x7fffffffdfc0, move=..., claimed=0x7fffffffdfa0) at src/game.c:19
 19	    *claimed = 0U;
 
 GDB: inspect the shared edge before A claims two boxes
@@ -101,11 +101,11 @@ Hardware watchpoint 2: -location $state->scores[0]
 
 Old value = 0
 New value = 2
-game_play_turn (game=0x7fffffffdf10, move=..., claimed=0x7fffffffdef0) at src/game.c:30
+game_play_turn (game=0x7fffffffdfc0, move=..., claimed=0x7fffffffdfa0) at src/game.c:30
 30	    if (*claimed == 0U) {
 
 GDB: A's score changed by two
-#0  game_play_turn (game=0x7fffffffdf10, move=..., claimed=0x7fffffffdef0) at src/game.c:30
+#0  game_play_turn (game=0x7fffffffdfc0, move=..., claimed=0x7fffffffdfa0) at src/game.c:30
 #1  0x00005555555554fc in main () at src/main.c:50
 0x00005555555554fc in main () at src/main.c:50
 50	        move_status = game_play_turn(&game, move, &claimed);
@@ -127,5 +127,5 @@ Scores: A=2 B=0 | Claimed: 2/20 | Moves: 7/49
 
 Player A: enter r1 c1 r2 c2 >
 Input ended. Game stopped before completion.
-[Inferior 1 (process 125) exited normally]
+[Inferior 1 (process 122) exited normally]
 PASS: GDB verified two owners, two points, and A's retained turn

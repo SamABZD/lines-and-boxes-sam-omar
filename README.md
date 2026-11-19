@@ -10,7 +10,7 @@ Run these commands from the project folder on Linux with a C compiler and GNU Ma
 
 ```sh
 make
-./build/release/dots_and_boxes
+./dotsboxes
 ```
 
 Enter two neighboring dots as `row1 col1 row2 col2`. Rows go from 0 to 4 and columns from 0 to 5. For example, `0 0 0 1` draws the top-left horizontal line.
@@ -21,8 +21,8 @@ Each completed box is worth one point and gives the player another turn. One lin
 
 ```sh
 make test
-make gdb-check
-make memcheck
+make gdb
+make valgrind
 ```
 
-The [debugging notes](debugging-strategy.md) list the checks and results. The [Sprint 1 download](https://github.com/SamABZD/lines-and-boxes-sam-omar/releases/tag/sprint-1-v2) includes the source and VM image.
+The checks and results are in the [debugging notes](debugging-strategy.md). The source and VM image are in the [Sprint 1 download](https://github.com/SamABZD/lines-and-boxes-sam-omar/releases/latest).

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-game=${1:-./build/debug/dots_and_boxes}
+game=${1:-./dotsboxes}
 temporary=$(mktemp -d)
 trap 'rm -rf "$temporary"' EXIT HUP INT TERM
 
